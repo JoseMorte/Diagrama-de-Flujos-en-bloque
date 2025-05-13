@@ -1,0 +1,47 @@
+body {
+  font-family: sans-serif;
+  background: #f9f9f9;
+  padding: 20px;
+}
+
+textarea {
+  width: 100%;
+  font-family: monospace;
+}
+
+#diagrama {
+  margin-top: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  display: grid;
+  gap: 16px;
+  justify-content: start;
+  align-items: center;
+  box-shadow: 0 0 10px #ccc;
+}
+
+.bloque {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  padding: 12px 18px;
+  background: white;
+  border: 3px solid #3f3f8c;
+  border-radius: 12px;
+}
+
+.borde-empaquetado {
+  border-color: #5d3820;
+}
+
+.borde-impresion {
+  border-color: #4fa5c8;
+}
+
+.flecha {
+  font-size: 22px;
+  color: #b03a78;
+  text-align: center;
+}

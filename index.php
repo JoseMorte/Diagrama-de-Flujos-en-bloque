@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Diagrama de bloques exacto</title>
-  <link rel="stylesheet" href="style2.css">
+  <link rel="stylesheet" href="styleOK.css">
 </head>
 
 <body>
@@ -22,7 +22,7 @@
 
   <div id="diagrama"></div>
 
-  <script src="script2.js"></script>
+  <script src="scriptOK.js"></script>
 </body>
 
 </html>

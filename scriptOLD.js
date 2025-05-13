@@ -7,10 +7,27 @@ function generarBloques() {
 
     const columnas = Math.max(...procesos.map(p => p.length));
     const filas = procesos.length;
+
+    // 1. Contar presencia de cada estado
+    const ocurrencias = {};
+    procesos.forEach(p => {
+        new Set(p).forEach(etapa => {
+            ocurrencias[etapa] = (ocurrencias[etapa] || 0) + 1;
+        });
+    });
+
+    // 2. Ordenar procesos para agrupar los que comparten estados frecuentes
+    procesos.sort((a, b) => {
+        const pesoA = a.reduce((sum, e) => sum + (ocurrencias[e] || 0), 0);
+        const pesoB = b.reduce((sum, e) => sum + (ocurrencias[e] || 0), 0);
+        return pesoB - pesoA; // primero los más pesados
+    });
+
     contenedor.style.gridTemplateColumns = `repeat(${columnas * 2 - 1}, auto)`;
     contenedor.style.gridTemplateRows = `repeat(${filas}, auto)`;
 
     const posiciones = {};
+
     procesos.forEach((fila, filaIdx) => {
         fila.forEach((estado, colIdx) => {
             if (!posiciones[estado]) posiciones[estado] = [];
@@ -20,16 +37,17 @@ function generarBloques() {
         });
     });
 
-    const rangosVisibles = {}; // estado -> array de rangos [start, end]
+    const colocados = new Set();
 
     Object.entries(posiciones).forEach(([estado, filasOcupadas]) => {
         const col = procesos.find(p => p.includes(estado))?.indexOf(estado);
         if (col === -1) return;
 
+        // Ordenamos las filas que comparten ese estado
         const ordenadas = [...filasOcupadas].sort((a, b) => a - b);
-        let tramo = [ordenadas[0]];
-        rangosVisibles[estado] = [];
 
+        // Dividimos en tramos contiguos y sin conflictos
+        let tramo = [ordenadas[0]];
         for (let i = 1; i < ordenadas.length; i++) {
             const anterior = ordenadas[i - 1];
             const actual = ordenadas[i];
@@ -43,27 +61,20 @@ function generarBloques() {
 
             if (hayConflicto) {
                 renderTramo(tramo, col, estado);
-                rangosVisibles[estado].push([Math.min(...tramo), Math.max(...tramo)]);
                 tramo = [];
             }
             tramo.push(actual);
         }
-
         if (tramo.length) {
             renderTramo(tramo, col, estado);
-            rangosVisibles[estado].push([Math.min(...tramo), Math.max(...tramo)]);
         }
     });
 
     function renderTramo(filas, col, estado) {
         const div = document.createElement("div");
         div.className = "bloque";
-        if (estado.includes("Z")) div.setAttribute("data-color", "empaquetado");
-        else if (estado.includes("F") || estado.includes("B") || estado.includes("L")) div.setAttribute("data-color", "laser");
-        else if (estado.includes("I")) div.setAttribute("data-color", "impresion");
-        else div.setAttribute("data-color", "otros");
-
         div.textContent = estado;
+
         div.style.gridColumn = `${(col + 1) * 2 - 1}`;
         div.style.gridRow = `${Math.min(...filas) + 1} / ${Math.max(...filas) + 2}`;
         div.style.alignSelf = "stretch";
@@ -79,20 +90,25 @@ function generarBloques() {
         contenedor.appendChild(div);
     }
 
-    // Dibujar flechas por defecto entre columnas visibles
-    for (let filaIdx = 0; filaIdx < filas; filaIdx++) {
-        for (let col = 0; col < columnas - 1; col++) {
+
+    // Dibujar flechas largas por proceso
+    procesos.forEach((fila, filaIdx) => {
+        for (let i = 0; i < fila.length - 1; i++) {
+            const colOrigen = (i + 1) * 2 - 1;
+            const colDestino = (i + 2) * 2 - 1;
+
             const flecha = document.createElement("div");
             flecha.className = "flecha";
             flecha.textContent = "→";
             flecha.style.gridRow = filaIdx + 1;
-            flecha.style.gridColumn = `${(col + 1) * 2}`;
+            flecha.style.gridColumn = `${colOrigen + 1} / ${colDestino}`;
             flecha.style.display = "flex";
             flecha.style.alignItems = "center";
             flecha.style.justifyContent = "center";
+
             contenedor.appendChild(flecha);
         }
-    }
+    });
 
 }
 
@@ -115,3 +131,4 @@ function reordenarFilas(procesos) {
 
     return resultado.flat();
 }
+
