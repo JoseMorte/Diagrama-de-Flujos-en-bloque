@@ -79,21 +79,40 @@ function generarBloques() {
         contenedor.appendChild(div);
     }
 
-    // Dibujar flechas por defecto entre columnas visibles
+    // Encontrar la última columna del grid (independientemente del nombre del estado)
+    const ultimaColumnaGrid = columnas * 2 - 1;
+
+    // Dibujar flechas horizontales continuas por cada fila/proceso
     for (let filaIdx = 0; filaIdx < filas; filaIdx++) {
-        for (let col = 0; col < columnas - 1; col++) {
-            const flecha = document.createElement("div");
-            flecha.className = "flecha";
-            flecha.textContent = "→";
-            flecha.style.gridRow = filaIdx + 1;
-            flecha.style.gridColumn = `${(col + 1) * 2}`;
-            flecha.style.display = "flex";
-            flecha.style.alignItems = "center";
-            flecha.style.justifyContent = "center";
-            contenedor.appendChild(flecha);
+        const proceso = procesos[filaIdx];
+        if (proceso && proceso.length > 1) {
+            // Siempre iniciamos desde la primera columna
+            const primerCol = 0;
+
+            // Crear una flecha horizontal continua
+            const flechaHorizontal = document.createElement("div");
+            flechaHorizontal.className = "flecha-horizontal";
+
+            // Posicionar la flecha desde la primera columna hasta la última columna del grid
+            flechaHorizontal.style.gridRow = filaIdx + 1;
+            // La flecha ahora va desde el inicio del primer bloque hasta el final del grid
+            flechaHorizontal.style.gridColumn = `${primerCol * 2 + 1} / ${ultimaColumnaGrid + 2}`;
+
+            // Añadir la línea horizontal
+            const lineaHorizontal = document.createElement("div");
+            lineaHorizontal.className = "linea-horizontal";
+            flechaHorizontal.appendChild(lineaHorizontal);
+
+            // Añadir la punta de flecha al final
+            const puntaFlecha = document.createElement("div");
+            puntaFlecha.className = "punta-flecha";
+            puntaFlecha.textContent = "→";
+            flechaHorizontal.appendChild(puntaFlecha);
+
+            // Insertar al inicio para que quede por debajo de los bloques
+            contenedor.prepend(flechaHorizontal);
         }
     }
-
 }
 
 function reordenarFilas(procesos) {
