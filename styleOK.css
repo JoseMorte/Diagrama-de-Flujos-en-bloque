@@ -126,3 +126,97 @@ button:hover {
   z-index: 1;
   position: relative;
 }
+
+
+/*Estilo pra el modal de tabla editable*/
+    /* Modal */
+    .modalFlujo {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modalContenido {
+        background: #fff;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 1200px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .modalContenido h3 {
+        margin-top: 0;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Editor */
+    .editorWrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    /* Tabla editable */
+    .gridEditorFlujo {
+        display: grid;
+        gap: 6px;
+    }
+
+    /* Celdas */
+    .celdaCabecera {
+        background-color: #eee;
+        padding: 6px;
+        font-weight: bold;
+        font-size: 0.85rem;
+        text-align: center;
+        border-radius: 4px;
+    }
+
+    .celdaEditor {
+        min-height: 40px;
+        border: 1px dashed #888;
+        padding: 8px;
+        border-radius: 4px;
+        text-align: center;
+        font-size: 0.95rem;
+        background: #fdfdfd;
+        user-select: none;
+        cursor: grab;
+    }
+
+    .celdaEditor.drag-over {
+        background-color: #d6f0ff;
+        border: 2px dashed #339;
+    }
+
+    /* Botones */
+    .botonesModal {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .botonesModal button {
+        padding: 0.5rem 1rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 4px;
+        background-color: #933c74;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .botonesModal button:hover {
+        background-color: #7a2e5f;
+    }

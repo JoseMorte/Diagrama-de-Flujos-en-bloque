@@ -134,3 +134,191 @@ function reordenarFilas(procesos) {
 
     return resultado.flat();
 }
+
+
+
+//FUNCIONES PARA MODAL DE EDITAR FLUJO.
+
+// Mostrar el modal
+function abrirModalFlujo() {
+    document.getElementById("modalEditorFlujo").style.display = "flex";
+    renderEditorDesdeProcesos(); // construye editor visual con los procesos existentes
+}
+
+// Ocultar el modal
+function cerrarModalFlujo() {
+    document.getElementById("modalEditorFlujo").style.display = "none";
+}
+
+// Guardar y regenerar el diagrama
+function guardarCambiosDiagrama() {
+    const celdas = document.querySelectorAll("#editorFlujo .celdaEditor");
+    const columnas = parseInt(getComputedStyle(document.getElementById("editorFlujo")).gridTemplateColumns.split(" ").length);
+    const filas = Math.ceil(celdas.length / columnas);
+
+    const nuevosProcesos = [];
+
+    for (let i = 0; i < filas; i++) {
+        const fila = [];
+        for (let j = 0; j < columnas; j++) {
+            const idx = i * columnas + j;
+            const celda = celdas[idx];
+            if (!celda || celda.textContent.trim() === "") {
+                fila.push(null);
+            } else {
+                fila.push({
+                    nombre: celda.textContent.trim()
+                });
+            }
+        }
+        nuevosProcesos.push(fila);
+    }
+
+    // ✅ Limpiamos procesos antes de usarlos
+    procesosTransformados = limpiarProcesos(nuevosProcesos);
+    cerrarModalFlujo();
+    generarBloques(procesosTransformados);
+}
+
+
+function limpiarProcesos(procesosRaw) {
+    return procesosRaw.map(fila =>
+        fila.filter(celda => celda && celda.nombre && celda.nombre.trim() !== "")
+    ).filter(fila => fila.length > 0);
+}
+
+// Lógica de render del editor en modo editor
+function renderEditorDesdeProcesos() {
+  const contenedor = document.getElementById("editorFlujo");
+  contenedor.innerHTML = "";
+
+  const filas = procesosTransformados.length;
+  const columnas = Math.max(...procesosTransformados.map(p => p.length));
+
+  // Crear tabla unificada
+  const tabla = document.createElement("div");
+  tabla.className = "tablaEditorFlujo";
+  tabla.style.display = "grid";
+  tabla.style.gridTemplateColumns = `repeat(${columnas}, auto)`;
+
+  // Cabecera (una sola fila)
+  for (let c = 0; c < columnas; c++) {
+    const cab = document.createElement("div");
+    cab.className = "celdaCabecera";
+    cab.textContent = c === 0 ? "Origen" : `Paso ${c}`;
+    tabla.appendChild(cab);
+  }
+
+  // Celdas de contenido
+  for (let f = 0; f < filas; f++) {
+    for (let c = 0; c < columnas; c++) {
+      const dato = procesosTransformados[f][c] || null;
+      const celda = document.createElement("div");
+      celda.className = "celdaEditor";
+      celda.dataset.fila = f;
+      celda.dataset.columna = c;
+
+      if (dato) {
+        const contenido = document.createElement("div");
+        contenido.className = "itemDeptEditor";
+        contenido.textContent = dato.nombre || dato;
+        contenido.draggable = true;
+
+        // Drag
+        contenido.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", contenido.textContent);
+        });
+
+        // Botón eliminar
+        const btn = document.createElement("span");
+        btn.className = "btnEliminarDept";
+        btn.textContent = "×";
+        btn.onclick = () => {
+          procesosTransformados[f][c] = null;
+          renderEditorDesdeProcesos();
+        };
+        contenido.appendChild(btn);
+
+        celda.appendChild(contenido);
+      }
+
+      // Drop
+      celda.ondragover = (e) => e.preventDefault();
+      celda.ondrop = (e) => {
+        e.preventDefault();
+        const nombre = e.dataTransfer.getData("text/plain");
+        if (!procesosTransformados[f]) procesosTransformados[f] = [];
+        procesosTransformados[f][c] = { nombre: nombre.trim() };
+        renderEditorDesdeProcesos();
+      };
+
+      tabla.appendChild(celda);
+    }
+  }
+
+  contenedor.appendChild(tabla);
+}
+
+
+
+function manejarDrop(e) {
+    e.preventDefault();
+    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+    const origenFila = data.fila;
+    const origenColumna = data.columna;
+
+    const destinoFila = parseInt(this.dataset.fila);
+    const destinoColumna = parseInt(this.dataset.columna);
+
+    const dept = procesosTransformados[origenFila][origenColumna];
+
+    // Limpiar origen
+    procesosTransformados[origenFila][origenColumna] = null;
+
+    // Insertar en destino
+    if (!procesosTransformados[destinoFila]) procesosTransformados[destinoFila] = [];
+    procesosTransformados[destinoFila][destinoColumna] = dept;
+
+    renderEditorDesdeProcesos(); // Redibujar editor
+}
+
+function agregarFilaEditor() {
+  const columnas = Math.max(...procesosTransformados.map(p => p.length));
+  const nuevaFila = Array(columnas).fill(null);
+  procesosTransformados.push(nuevaFila);
+  renderEditorDesdeProcesos();
+}
+
+
+function agregarColumnaEditor() {
+  procesosTransformados = procesosTransformados.map(fila => {
+    return [...fila, null]; // Añade una columna vacía a cada fila
+  });
+  renderEditorDesdeProcesos();
+}
+
+
+// Listener para botón (una sola vez al cargar)
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("btnAbrirEditorFlujo");
+    if (btn) {
+        btn.addEventListener("click", abrirModalFlujo);
+    }
+
+    document.getElementById("btnGuardarEditor").addEventListener("click", guardarCambiosDiagrama);
+    document.getElementById("btnCancelarEditor").addEventListener("click", cerrarModalFlujo);
+
+    // ⬇️ Añadir botones dinámicamente al cargar
+    const botonesZona = document.querySelector(".botonesModal");
+    if (botonesZona) {
+        const btnFila = document.createElement("button");
+        btnFila.textContent = "➕ Añadir Fila";
+        btnFila.addEventListener("click", agregarFilaEditor);
+        botonesZona.prepend(btnFila);
+
+        const btnColumna = document.createElement("button");
+        btnColumna.textContent = "➕ Añadir Columna";
+        btnColumna.addEventListener("click", agregarColumnaEditor);
+        botonesZona.prepend(btnColumna);
+    }
+});

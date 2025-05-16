@@ -22,6 +22,27 @@
 
   <div id="diagrama"></div>
 
+  <!-- HTML para el modal de la tbaa editable-->
+  <div id="modalEditorFlujo" class="modalFlujo" style="display: none;">
+    <div class="modalContenido">
+      <h3>Editar Flujo de Producción</h3>
+      <div id="editorWrapper" class="editorWrapper">
+
+        <!-- Aquí se renderiza toda la tabla: cabecera + filas -->
+        <div id="editorFlujo" class="gridEditorFlujo"></div>
+
+        <!-- Botones -->
+        <div class="botonesModal">
+          <button id="btnAgregarColumna">➕ Añadir Columna</button>
+          <button id="btnAgregarFila">➕ Añadir Fila</button>
+          <button id="btnGuardarEditor">Guardar cambios</button>
+          <button id="btnCancelarEditor">Cancelar</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script src="scriptOK.js"></script>
 </body>
 
